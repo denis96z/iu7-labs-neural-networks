@@ -4,6 +4,14 @@ from matrix import Matrix
 class Perceptron:
     def __init__(self):
         self.__layers__ = []
+        self.__act_func__ = lambda x: x
+        self.__learning_rate__ = 0.1
+
+    def set_act_func(self, f):
+        self.__act_func__ = f
+
+    def set_learning_rate(self, rate):
+        self.__learning_rate__ = rate
 
     def add_layer(self, num_outputs, num_inputs=-1):
         n = len(self.__layers__)
