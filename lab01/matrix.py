@@ -13,6 +13,14 @@ class Matrix:
                 self.__items__[i][j] = random.random()
 
     @staticmethod
+    def initialized(num_rows, num_cols, value):
+        result = Matrix(num_rows, num_cols)
+        for i in range(0, num_rows):
+            for j in range(0, num_cols):
+                result.__items__[i][j] = value
+        return result
+
+    @staticmethod
     def identity(num_rows):
         result = Matrix(num_rows, num_rows)
         for i in range(0, num_rows):
@@ -63,6 +71,13 @@ class Matrix:
                 for k in range(0, self.__num_cols__):
                     s += self.__items__[i][k] * other.__items__[k][j]
                 result.__items__[i][j] = s
+        return result
+
+    def apply_func(self, f):
+        result = Matrix(self.__num_rows__, self.__num_cols__)
+        for i in range(0, self.__num_rows__):
+            for j in range(0, self.__num_cols__):
+                result.__items__[i][j] = f(self.__items__[i][j])
         return result
 
     def __iter__(self):
