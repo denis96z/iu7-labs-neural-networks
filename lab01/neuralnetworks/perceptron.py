@@ -1,4 +1,4 @@
-from matrix import Matrix
+from neuralnetworks.matrix import Matrix
 
 
 class Perceptron:

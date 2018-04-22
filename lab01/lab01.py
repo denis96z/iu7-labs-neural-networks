@@ -1,5 +1,5 @@
 from math import exp
-from perceptron import Perceptron
+from neuralnetworks.perceptron import Perceptron
 
 
 def sigmoid(x):
