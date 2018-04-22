@@ -8,6 +8,9 @@ class Perceptron:
             self.__weights__ = Matrix(num_outputs, num_inputs)
             self.__weights__.init_random()
             self.__offset__ = Matrix.initialized(num_outputs, 1, threshold)
+            self.__latest_x_input__ = None
+            self.__latest_v_output__ = None
+            self.__latest_y_output__ = None
 
         def get_num_inputs(self):
             return self.__weights__.get_num_cols()
@@ -16,12 +19,27 @@ class Perceptron:
             return self.__weights__.get_num_rows()
 
         def predict(self, in_vector):
-            v = (self.__weights__ * in_vector) + self.__offset__
-            y = v.apply_func(self.__perceptron__.__act_func__)
-            return y
+            self.__latest_x_input__ = in_vector
+            self.__latest_v_output__ = (self.__weights__ * in_vector) + self.__offset__
+            self.__latest_y_output__ = self.__latest_v_output__.apply_func(self.__perceptron__.__act_func__)
+            return self.__latest_y_output__
 
-        def learn(self):
-            raise NotImplementedError()
+        def learn_from_vector(self, expected):
+            err = expected - self.__latest_y_output__
+            return self.learn_from_error(err)
+
+        def learn_from_error(self, err):
+            dif = self.__latest_v_output__.apply_func(self.__perceptron__.__act_func_dif__)
+            grad = Matrix(dif.get_num_rows(), 1)
+            for i in range(0, dif.get_num_rows()):
+                grad[i][0] = err[i][0] * dif[i][0]
+            n_rows, n_cols = grad.get_num_rows(), self.__latest_x_input__.get_num_rows()
+            w_adj = Matrix(n_rows, n_cols)
+            for i in range(0, n_rows):
+                for j in range(0, n_cols):
+                    w_adj[i][j] = self.__perceptron__.__learning_rate__ * grad[i][0] * self.__latest_x_input__[j][0]
+            self.__weights__ = self.__weights__ + w_adj
+            return (grad.transposed() * self.__weights__).transposed()
 
     def __init__(self):
         self.__layers__ = []
@@ -44,10 +62,19 @@ class Perceptron:
         self.__layers__.append(self.__create_layer__(num_inputs, num_outputs, threshold))
 
     def predict(self, in_vector):
+        assert len(self.__layers__) > 0
         out_vector = Matrix.from_list(in_vector)
         for layer in self.__layers__:
             out_vector = layer.predict(out_vector)
         return out_vector
+
+    def learn(self, in_vector, expected_out_vector):
+        self.predict(in_vector)
+        n = len(self.__layers__)
+        expected_out_vector = Matrix.from_list(expected_out_vector)
+        err = self.__layers__[n - 1].learn_from_vector(expected_out_vector)
+        for i in reversed(range(n - 1)):
+            err = self.__layers__[i].learn_from_error(err)
 
     def __create_layer__(self, num_inputs, num_outputs, threshold):
         return Perceptron.PerceptronLayer(self, num_inputs, num_outputs, threshold)

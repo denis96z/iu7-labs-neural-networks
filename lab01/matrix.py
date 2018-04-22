@@ -80,6 +80,13 @@ class Matrix:
                 result.__items__[i][j] = f(self.__items__[i][j])
         return result
 
+    def transposed(self):
+        result = Matrix(self.__num_cols__, self.__num_rows__)
+        for i in range(0, self.__num_rows__):
+            for j in range(0, self.__num_cols__):
+                result.__items__[j][i] = self.__items__[i][j]
+        return result
+
     def __iter__(self):
         return self.__items__.__iter__()
 
