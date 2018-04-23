@@ -66,7 +66,7 @@ class Perceptron:
         out_vector = Matrix.from_list(in_vector)
         for layer in self.__layers__:
             out_vector = layer.predict(out_vector)
-        return out_vector
+        return self.__find_max_index__(out_vector)
 
     def learn(self, in_vector, expected_out_vector):
         self.predict(in_vector)
@@ -78,3 +78,11 @@ class Perceptron:
 
     def __create_layer__(self, num_inputs, num_outputs, threshold):
         return Perceptron.PerceptronLayer(self, num_inputs, num_outputs, threshold)
+
+    @staticmethod
+    def __find_max_index__(out_vector):
+        max_index = 0
+        for i in range(1, out_vector.get_num_rows()):
+            if out_vector[i][0] > out_vector[max_index][0]:
+                max_index = i
+        return max_index
