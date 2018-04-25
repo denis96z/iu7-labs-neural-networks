@@ -26,7 +26,7 @@ class Perceptron:
 
         def learn_from_vector(self, expected):
             err = expected - self.__latest_y_output__
-            return self.learn_from_error(err)
+            return err, self.learn_from_error(err)
 
         def learn_from_error(self, err):
             dif = self.__latest_v_output__.apply_func(self.__perceptron__.__act_func_dif__)
@@ -66,18 +66,28 @@ class Perceptron:
         out_vector = Matrix.from_list(in_vector)
         for layer in self.__layers__:
             out_vector = layer.predict(out_vector)
-        return self.__find_max_index__(out_vector)
+        return out_vector
 
     def learn(self, in_vector, expected_out_vector):
         self.predict(in_vector)
         n = len(self.__layers__)
         expected_out_vector = Matrix.from_list(expected_out_vector)
-        err = self.__layers__[n - 1].learn_from_vector(expected_out_vector)
+        out_err, err = self.__layers__[n - 1].learn_from_vector(expected_out_vector)
         for i in reversed(range(n - 1)):
             err = self.__layers__[i].learn_from_error(err)
+        return Perceptron.__count_mse__(out_err)
 
     def __create_layer__(self, num_inputs, num_outputs, threshold):
         return Perceptron.PerceptronLayer(self, num_inputs, num_outputs, threshold)
+
+    @staticmethod
+    def __count_mse__(err_vector):
+        err_vector = err_vector.to_list()
+        n = len(err_vector)
+        s = 0
+        for x in err_vector:
+            s += x * x
+        return s / n
 
     @staticmethod
     def __find_max_index__(out_vector):

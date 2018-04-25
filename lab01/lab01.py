@@ -1,14 +1,13 @@
 from math import exp
 from PIL import Image
 from neuralnetworks.perceptron import Perceptron
-
+from neuralnetworks.matrix import Matrix
 
 IMG_SIZE = (10, 10)
 LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
 NUM_INPUTS = IMG_SIZE[0] * IMG_SIZE[1] * 4
 NUM_OUTPUTS = len(LETTERS)
-
 
 NUM_TRAINING_SETS = 100
 NUM_EPOCHS = 100
@@ -24,10 +23,21 @@ def main():
     p.set_learning_rate(0.5)
     p.set_act_func(sigmoid, sigmoid_dif)
 
-    p.add_layer(num_inputs=NUM_INPUTS, num_outputs=512, threshold=0.5)
-    p.add_layer(num_outputs=256, threshold=0.2)
+    p.add_layer(num_inputs=NUM_INPUTS, num_outputs=256, threshold=0.5)
     p.add_layer(num_outputs=64, threshold=0.1)
     p.add_layer(num_outputs=NUM_OUTPUTS, threshold=0.05)
+
+    x_train, y_train = load_sets(TRAINING_SETS_DIR, NUM_TRAINING_SETS)
+
+    for i in range(NUM_EPOCHS):
+        max_mse, max_mse_index = 0, 0
+        for j in range(len(x_train)):
+            cur_mse = p.learn(x_train[j], y_train[j])
+            if cur_mse > max_mse:
+                max_mse, max_mse_index = cur_mse, j
+        cur_mse = p.learn(x_train[max_mse_index], y_train[max_mse_index])
+        while cur_mse < max_mse:
+            max_mse = cur_mse
 
 
 def sigmoid(x):
