@@ -87,6 +87,9 @@ class Matrix:
                 result.__items__[j][i] = self.__items__[i][j]
         return result
 
+    def to_list(self):
+        return [(lambda index: self.__items__[index][0])(i) for i in range(self.__num_rows__)]
+
     def __iter__(self):
         return self.__items__.__iter__()
 
