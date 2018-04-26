@@ -13,7 +13,7 @@ NUM_TRAINING_SETS = 100
 NUM_EPOCHS = 100
 TRAINING_SETS_DIR = './data/training_sets'
 
-NUM_TEST_SETS = 1
+NUM_TEST_SETS = 10
 TEST_SETS_DIR = './data/test_sets'
 
 
@@ -25,19 +25,40 @@ def main():
 
     p.add_layer(num_inputs=NUM_INPUTS, num_outputs=256, threshold=0.5)
     p.add_layer(num_outputs=64, threshold=0.1)
-    p.add_layer(num_outputs=NUM_OUTPUTS, threshold=0.05)
+    p.add_layer(num_outputs=NUM_OUTPUTS)
 
+    print('LOADING DATA...')
     x_train, y_train = load_sets(TRAINING_SETS_DIR, NUM_TRAINING_SETS)
+    x_test, y_test = load_sets(TEST_SETS_DIR, NUM_TEST_SETS)
 
+    print('LEARNING...')
     for i in range(NUM_EPOCHS):
+        print('EPOCH #' + str(i))
         max_mse, max_mse_index = 0, 0
-        for j in range(len(x_train)):
+        for j in range(NUM_TRAINING_SETS):
             cur_mse = p.learn(x_train[j], y_train[j])
+            print('MSE[' + str(j) + ']=' + str(cur_mse))
             if cur_mse > max_mse:
                 max_mse, max_mse_index = cur_mse, j
+        print('MAX(MSE)=' + str(max_mse) + ' INDEX=' + str(max_mse_index))
         cur_mse = p.learn(x_train[max_mse_index], y_train[max_mse_index])
-        while cur_mse < max_mse:
+        while (cur_mse < max_mse) and (cur_mse > 0.01):
             max_mse = cur_mse
+            print('MSE[' + str(max_mse_index) + ']=' + str(cur_mse))
+            cur_mse = p.learn(x_train[max_mse_index], y_train[max_mse_index])
+
+    print('TESTING...')
+    for i in range(len(x_test)):
+        print('EXPECTED:')
+        print(y_test[i])
+        print('RESULT:')
+        y = p.predict(x_test[i]).to_list()
+        index = 0
+        for i in range(1, len(y)):
+            if y[i] > y[index]:
+                index = i
+        print('INDEX OF MAX=' + str(index))
+        print(y)
 
 
 def sigmoid(x):
